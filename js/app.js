@@ -85,6 +85,8 @@ var DM = {
   });
 
   var add_files = function(files){
+    files.sort();
+
     var list = $('select.file-list').empty();
     for (var file in files){
       $("<option value='"+ files[file] +"'>"+ files[file] +"</option>").appendTo(list);
@@ -185,25 +187,68 @@ var DM = {
             .attr("transform", function(d) {
               return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
             })
-            .text(function(d) { return d.text.substring(0,12); });
+            .text(function(d) { return d.text; });
       }
     },
     list: function(set){
-      reset_canvas();
-      $('#view_canvas').addClass('list');
-      var max = set[0][1];
-      var min = set[set.length - 1][1] || 1;
+      var fill = d3.scale.category20();
+
+      words = [];
+      for (var i in set){
+        if (set[i][1]){
+          words.push(set[i]);
+        }
+      }
+
+      var max = words[0][1];
+      var min = words[words.length - 1][1];
       var min_size = 10;
       var max_size = 72;
 
       var font_scale = d3.scale.log().domain([min, max]).range([min_size, max_size]);
-      for (var i in set){
-        console.log(set[i]);
-        if (set[i][1] > 0){
-            $('<div>').appendTo('#view_canvas').text(set[i][0]).css({'font-size': font_scale(set[i][1]), 'line-height': 1});
-        }
-      }
 
+      window_dimensions = getWH();
+      winW = window_dimensions[0] - $('.span2').width();
+      winH = window_dimensions[1];
+      var total_height = 0;
+      for (i in words){
+        total_height += font_scale(words[i][1]) + 5;
+      }
+      reset_canvas();
+      $('#view_canvas').addClass('spiral');
+      d3.layout.cloud().size([winW, total_height])
+          .words(words.map(function(elem) {
+            console.log(elem);
+            return {text: elem[0], size: font_scale(elem[1])};
+          }))
+          .timeInterval(10)
+          .rotate(function(d) { return ~~(Math.random() * 5) * 30 - 60; })
+          .font("Impact")
+          .padding(1)
+          .fontSize(function(d) { return d.size; })
+          .on("end", draw)
+          .start();
+      y = 0;
+      function draw(words) {
+        d3.select("#view_canvas").append("svg")
+            .attr("width", winW)
+            .attr("height", total_height)
+          .append("g")
+            .attr("transform", "translate("+ winW/2 +","+ winH/2 +")")
+          .selectAll("text")
+            .data(words)
+          .enter().append("text")
+            .style("font-size", function(d) { return d.size + "px"; })
+            .style("font-family", "Impact")
+            .style("fill", function(d, i) { return fill(i); })
+            .attr("text-anchor", "start")
+            .attr("transform", function(d) {
+              y = y + d.size + 5;
+              console.log(d);
+              return "translate(" + [-winW / 2, -winH / 2 + y ] + ")rotate(0)";
+            })
+            .text(function(d) { return d.text; });
+      }
     },
     table: function(set){
       reset_canvas();
@@ -214,7 +259,192 @@ var DM = {
         $('<tr><td>'+ set[i][0] +'</td><td>'+ set[i][1] +'</td></tr>').appendTo(table);
       }
 
+    },
+    decline: function(set){
+      var fill = d3.scale.category20();
+
+      words = [];
+      for (var i in set){
+        if (set[i][1]){
+          words.push(set[i]);
+        }
+      }
+
+      var max = words[0][1];
+      var min = words[words.length - 1][1];
+      var min_size = 10;
+      var max_size = 72;
+
+      var font_scale = d3.scale.log().domain([min, max]).range([min_size, max_size]);
+
+      window_dimensions = getWH();
+      winW = window_dimensions[0] - $('.span2').width();
+      winH = window_dimensions[1];
+      var total_height = 0;
+      for (i in words){
+        total_height += font_scale(words[i][1]);
+      }
+      reset_canvas();
+      $('#view_canvas').addClass('spiral');
+      d3.layout.cloud().size([winW, total_height])
+          .words(words.map(function(elem) {
+            console.log(elem);
+            return {text: elem[0], size: font_scale(elem[1])};
+          }))
+          .timeInterval(10)
+          .rotate(function(d) { return ~~(Math.random() * 5) * 30 - 60; })
+          .font("Impact")
+          .padding(1)
+          .fontSize(function(d) { return d.size; })
+          .on("end", draw)
+          .start();
+      y = 0;
+      function draw(words) {
+        d3.select("#view_canvas").append("svg")
+            .attr("width", winW)
+            .attr("height", total_height)
+          .append("g")
+            .attr("transform", "translate("+ winW/2 +","+ winH/2 +")")
+          .selectAll("text")
+            .data(words)
+          .enter().append("text")
+            .style("font-size", function(d) { return d.size + "px"; })
+            .style("font-family", "Impact")
+            .style("fill", function(d, i) { return fill(i); })
+            .attr("text-anchor", "middle")
+            .attr("transform", function(d) {
+              y = y + d.size;
+              console.log(d);
+              return "translate(" + [0, -winH / 2 + y + 5] + ")rotate(0)";
+            })
+            .text(function(d) { return d.text; });
+      }
+    },
+    histogram: function(set){
+      var fill = d3.scale.category20();
+
+      words = [];
+      for (var i in set){
+        if (set[i][1]){
+          words.push(set[i]);
+        }
+      }
+
+      var max = words[0][1];
+      var min = words[words.length - 1][1];
+      var min_size = 10;
+      var max_size = 72;
+
+      var font_scale = d3.scale.log().domain([min, max]).range([min_size, max_size]);
+
+      window_dimensions = getWH();
+      winW = window_dimensions[0] - $('.span2').width();
+      winH = window_dimensions[1];
+      var total_width = 0;
+      for (i in words){
+        total_width += font_scale(words[i][1]) + 5;
+      }
+      reset_canvas();
+      $('#view_canvas').addClass('spiral');
+      d3.layout.cloud().size([total_width, winH])
+          .words(words.map(function(elem) {
+            console.log(elem);
+            return {text: elem[0], size: font_scale(elem[1])};
+          }))
+          .timeInterval(10)
+          .rotate(function(d) { return ~~(Math.random() * 5) * 30 - 60; })
+          .font("Impact")
+          .padding(1)
+          .fontSize(function(d) { return d.size; })
+          .on("end", draw)
+          .start();
+      x = 0;
+      function draw(words) {
+        d3.select("#view_canvas").append("svg")
+            .attr("width", total_width)
+            .attr("height", winH)
+          .append("g")
+            .attr("transform", "translate("+ winW/2 +","+ winH/2 +")")
+          .selectAll("text")
+            .data(words)
+          .enter().append("text")
+            .style("font-size", function(d) { return d.size + "px"; })
+            .style("font-family", "Impact")
+            .style("fill", function(d, i) { return fill(i); })
+            .attr("text-anchor", "end")
+            .attr("transform", function(d) {
+              x = x + d.size + 5;
+              console.log(d);
+              return "translate(" + [-winW / 2 + x, 200] + ")rotate(90)";
+            })
+            .text(function(d) { return d.text; });
+      }
+    },
+    spiral: function(set){
+      var fill = d3.scale.category20();
+
+      words = [];
+      for (var i in set){
+        if (set[i][1]){
+          words.push(set[i]);
+        }
+      }
+
+      var max = words[0][1];
+      var min = words[words.length - 1][1];
+      var min_size = 10;
+      var max_size = 72;
+
+      var font_scale = d3.scale.log().domain([min, max]).range([min_size, max_size]);
+
+      words.sort(function(a,b){ return a[1] - b[1]; });
+      console.log(words);
+
+
+      window_dimensions = getWH();
+      winW = window_dimensions[0] - $('.span2').width();
+      winH = window_dimensions[1];
+      reset_canvas();
+      $('#view_canvas').addClass('spiral');
+      d3.layout.cloud().size([winW, winH])
+          .words(words.map(function(elem) {
+            console.log(elem);
+            return {text: elem[0], size: font_scale(elem[1])};
+          }))
+          .timeInterval(10)
+          .font("Impact")
+          .padding(1)
+          .fontSize(function(d) { return d.size; })
+          .on("end", draw)
+          .start();
+      var r = 50;
+      var degrees =  360/ words.length;
+      var degree = 0;
+
+      function draw(words) {
+        words.sort(function(a,b){ return a.size - b.size; });
+
+        d3.select("#view_canvas").append("svg")
+            .attr("width", winW)
+            .attr("height", winH)
+          .append("g")
+            .attr("transform", "translate("+ winW/2 +","+ winH/2 +")")
+          .selectAll("text")
+            .data(words)
+          .enter().append("text")
+            .style("font-size", function(d) { return d.size + "px"; })
+            .style("font-family", "Impact")
+            .style("fill", function(d, i) { return fill(i); })
+            .attr("text-anchor", "start")
+            .attr("transform", function(d) {
+              degree = degree - degrees;
+              console.log(d);
+              return "translate(" + [-100 + parseInt(r * Math.sin(degree * (Math.PI / 180)), 10) ,100 - parseInt(r * Math.cos(degree * (Math.PI / 180)), 10)] + ")rotate("+ (-90 + degree) +")";
+            })
+            .text(function(d) { return d.text; });
+      }
     }
+
   };
 
   var reset_canvas = function(){
