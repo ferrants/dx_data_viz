@@ -30,13 +30,19 @@ var DM = {
     $('form').submit(function(){ return false; });
 
     var server = $('#form-load-file input[name=server]').val();
-    $.ajax({
-      url: server + 'list',
-      dataType: 'json',
-      success: function(a,b,c){
-        console.log(a);
-        add_files(a);
-      }
+    var load_from_server = function(server){
+      $.ajax({
+        url: server + '/list',
+        dataType: 'json',
+        success: function(a,b,c){
+          console.log(a);
+          add_files(a);
+        }
+      });
+    };
+    load_from_server(server);
+    $('#form-load-file input[name=server]').change(function(){
+      load_from_server($(this).val());
     });
 
     $('#form-load-file').submit(function(){

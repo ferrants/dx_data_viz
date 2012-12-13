@@ -4,32 +4,39 @@ var http = require('http');
     util = require('util');
 
 http.createServer(function (req, response) {
-
-  if (req.url == '/list'){
-    fileSystem.readdir('data', function(errp, files){
+  fileSystem.readdir('data', function(err, files){
+    console.log(files);
+    if (req.url == '/list'){
       console.log('Checking Filesystem');
-      console.log(files);
       response.writeHead(200, {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin' : '*'
       });
       response.end(JSON.stringify(files));
-    });
-  }else{
-    var filePath = path.join(__dirname, 'data' + req.url);
-    var stat = fileSystem.statSync(filePath);
+    }else if (files.indexOf(req.url.replace('/','')) != -1){
+      var filePath = path.join(__dirname, 'data' + req.url);
+      var stat = fileSystem.statSync(filePath);
 
-    response.writeHead(200, {
-      'Content-Type': 'text/csv',
-      'Access-Control-Allow-Origin' : '*',
-      'Content-Length': stat.size
-    });
+      response.writeHead(200, {
+        'Content-Type': 'text/csv',
+        'Access-Control-Allow-Origin' : '*',
+        'Content-Length': stat.size
+      });
 
-    var readStream = fileSystem.createReadStream(filePath);
-    util.pump(readStream, response);
-  }
+      var readStream = fileSystem.createReadStream(filePath);
+      util.pump(readStream, response);
+    }else{
+      console.log("Unable to find " + req.url.replace('/',''));
+      response.writeHead(404, {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin' : '*'
+      });
+      response.end(JSON.stringify({'error': "Not Found"}));
+    }
+    
+  });
 
-}).listen(9615);
+}).listen(8082);
 
 
 
