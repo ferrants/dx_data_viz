@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>DX Data</title>
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2">
+          <h1>Data-Viz</h1>
+          <form id='form-load-file'>
+            <label>CSV to Load</label>
+            <input type="text" name='file' placeholder="http://....." value='http://localhost:9615/'>
+            <button type="submit" class="btn">Load File</button>
+          </form>
+          <form id='form-dimension-metric'>
+            <h5>Text</h5>
+            <p>Which value to sort by and show</p>
+            <select id='choose-dimension' name='dimension' class='field-fill'></select>
+            <h5>Metric</h5>
+            <p>The value that is important to you</p>
+            <select id='choose-metric' name='metric' class='field-fill'></select>
+            <h5>Threshold</h5>
+            <p>Show only where the metric value is greater than the threshold specified below. If no threshold, it will show the top 100 results.</p>
+            <select id='choose-threshold' name='threshold-field' class='field-fill'></select>
+            <input type="text" name='threshold' placeholder="100" value=''>
+            <h5>View</h5>
+            <select name='view'>
+              <option value='cloud'>Cloud</option>
+              <option value='list'>List</option>
+              <option value='table'>Table</option>
+            </select>
+            <button type="submit" class="btn">Show</button>
+          </form>
+        </div>
+        <div class="span10">
+          <div id='view_canvas'></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="http://d3js.org/d3.v2.js"></script>
+    <script src="js/cloud.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
