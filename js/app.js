@@ -29,8 +29,19 @@ var DM = {
 
     $('form').submit(function(){ return false; });
 
+    var server = $('#form-load-file input[name=server]').val();
+    $.ajax({
+      url: server + 'list',
+      dataType: 'json',
+      success: function(a,b,c){
+        console.log(a);
+        add_files(a);
+      }
+    });
+
     $('#form-load-file').submit(function(){
-      var url = $('input[name=file]', this).val();
+      var server = $('input[name=server]', this).val();
+      var url = server + $('select[name=file]', this).val();
       console.log("Fetching Url: " + url);
       $.ajax({
         url: url,
@@ -66,6 +77,13 @@ var DM = {
     });
 
   });
+
+  var add_files = function(files){
+    var list = $('select.file-list').empty();
+    for (var file in files){
+      $("<option value='"+ files[file] +"'>"+ files[file] +"</option>").appendTo(list);
+    }
+  };
 
   var set_dimension_metrics = function(){
     $('.field-fill').empty();
