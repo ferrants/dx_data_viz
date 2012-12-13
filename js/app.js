@@ -47,7 +47,7 @@ var DM = {
 
     $('#form-load-file').submit(function(){
       var server = $('input[name=server]', this).val();
-      var url = server + $('select[name=file]', this).val();
+      var url = server + '/' + $('select[name=file]', this).val();
       console.log("Fetching Url: " + url);
       $.ajax({
         url: url,
